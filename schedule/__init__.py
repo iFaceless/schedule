@@ -79,6 +79,7 @@ class Scheduler(object):
     factories to create jobs, keep record of scheduled jobs and
     handle their execution.
     """
+
     def __init__(self):
         self.jobs = []
 
@@ -188,6 +189,17 @@ class Job(object):
     A job is usually created and returned by :meth:`Scheduler.every`
     method, which also defines its `interval`.
     """
+
+    WEEKDAYS = (
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
+        'saturday',
+        'sunday'
+    )
+
     def __init__(self, interval, scheduler=None):
         self.interval = interval  # pause interval * unit between runs
         self.latest = None  # upper limit to the interval
@@ -229,7 +241,7 @@ class Job(object):
             return not isinstance(j, Job)
 
         timestats = '(last run: %s, next run: %s)' % (
-                    format_time(self.last_run), format_time(self.next_run))
+            format_time(self.last_run), format_time(self.next_run))
 
         if hasattr(self.job_func, '__name__'):
             job_func_name = self.job_func.__name__
@@ -242,14 +254,14 @@ class Job(object):
 
         if self.at_time is not None:
             return 'Every %s %s at %s do %s %s' % (
-                   self.interval,
-                   self.unit[:-1] if self.interval == 1 else self.unit,
-                   self.at_time, call_repr, timestats)
+                self.interval,
+                self.unit[:-1] if self.interval == 1 else self.unit,
+                self.at_time, call_repr, timestats)
         else:
             fmt = (
-                'Every %(interval)s ' +
-                ('to %(latest)s ' if self.latest is not None else '') +
-                '%(unit)s do %(call_repr)s %(timestats)s'
+                    'Every %(interval)s ' +
+                    ('to %(latest)s ' if self.latest is not None else '') +
+                    '%(unit)s do %(call_repr)s %(timestats)s'
             )
 
             return fmt % dict(
@@ -316,10 +328,20 @@ class Job(object):
         return self
 
     @property
+    def mondays(self):
+        self.start_day = 'monday'
+        return self.weeks
+
+    @property
     def monday(self):
         if self.interval != 1:
             raise IntervalError('Use mondays instead of monday')
         self.start_day = 'monday'
+        return self.weeks
+
+    @property
+    def tuesdays(self):
+        self.start_day = 'tuesday'
         return self.weeks
 
     @property
@@ -330,10 +352,20 @@ class Job(object):
         return self.weeks
 
     @property
+    def wednesdays(self):
+        self.start_day = 'wednesday'
+        return self.weeks
+
+    @property
     def wednesday(self):
         if self.interval != 1:
             raise IntervalError('Use wednesdays instead of wednesday')
         self.start_day = 'wednesday'
+        return self.weeks
+
+    @property
+    def thursdays(self):
+        self.start_day = 'thursday'
         return self.weeks
 
     @property
@@ -344,6 +376,11 @@ class Job(object):
         return self.weeks
 
     @property
+    def fridays(self):
+        self.start_day = 'friday'
+        return self.weeks
+
+    @property
     def friday(self):
         if self.interval != 1:
             raise IntervalError('Use fridays instead of friday')
@@ -351,10 +388,20 @@ class Job(object):
         return self.weeks
 
     @property
+    def saturdays(self):
+        self.start_day = 'saturday'
+        return self.weeks
+
+    @property
     def saturday(self):
         if self.interval != 1:
             raise IntervalError('Use saturdays instead of saturday')
         self.start_day = 'saturday'
+        return self.weeks
+
+    @property
+    def sundays(self):
+        self.start_day = 'sunday'
         return self.weeks
 
     @property
@@ -506,18 +553,10 @@ class Job(object):
         if self.start_day is not None:
             if self.unit != 'weeks':
                 raise ScheduleValueError('`unit` should be \'weeks\'')
-            weekdays = (
-                'monday',
-                'tuesday',
-                'wednesday',
-                'thursday',
-                'friday',
-                'saturday',
-                'sunday'
-            )
-            if self.start_day not in weekdays:
+
+            if self.start_day not in self.WEEKDAYS:
                 raise ScheduleValueError('Invalid start day')
-            weekday = weekdays.index(self.start_day)
+            weekday = self.WEEKDAYS.index(self.start_day)
             days_ahead = weekday - self.next_run.weekday()
             if days_ahead <= 0:  # Target day already happened this week
                 days_ahead += 7
