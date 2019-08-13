@@ -49,6 +49,8 @@ Usage
     schedule.every().monday.do(job)
     schedule.every().wednesday.at("13:15").do(job)
     schedule.every().minute.at(":17").do(job)
+    schedule.every(2).mondays.do(job)
+    schedule.every(2).weeks.on('monday')
 
     while True:
         schedule.run_pending()

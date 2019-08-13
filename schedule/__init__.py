@@ -327,6 +327,13 @@ class Job(object):
         self.unit = 'weeks'
         return self
 
+    def on(self, weekday):
+        if weekday not in self.WEEKDAYS:
+            raise IntervalError("Invalid weekday")
+
+        self.start_day = weekday
+        return self.weeks
+
     @property
     def mondays(self):
         self.start_day = 'monday'
